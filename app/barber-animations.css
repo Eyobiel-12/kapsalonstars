@@ -1,0 +1,320 @@
+/* Common optimizations for animations */
+@media (prefers-reduced-motion: reduce) {
+  /* Reduce animations for users who prefer reduced motion */
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Use the will-change property sparingly for elements that will actually change */
+.scissors-animation::before,
+.scissors-animation::after,
+.comb-animation::before,
+.razor-animation::before,
+.hairdryer-animation::before,
+.floating-hair .hair-strand,
+.shine-effect::after,
+.barber-pole {
+  will-change: transform, opacity;
+  transform: translateZ(0); /* Force GPU acceleration */
+}
+
+/* Scissors Animation */
+.scissors-animation {
+  position: relative;
+  display: inline-block;
+}
+
+.scissors-animation::before,
+.scissors-animation::after {
+  content: '✂️';
+  position: absolute;
+  font-size: 1.5rem;
+  opacity: 0;
+  animation: snip 3s infinite;
+  transform: translateZ(0); /* Force GPU acceleration */
+}
+
+.scissors-animation::before {
+  left: -30px;
+  top: -15px;
+  transform: translateZ(0) rotate(-30deg);
+  animation-delay: 0.5s;
+}
+
+.scissors-animation::after {
+  right: -30px;
+  top: -15px;
+  transform: translateZ(0) rotate(30deg);
+  animation-delay: 1.5s;
+}
+
+@keyframes snip {
+  0% {
+    opacity: 0;
+    transform: translateZ(0) translateY(0) rotate(-30deg);
+  }
+  10% {
+    opacity: 1;
+  }
+  30% {
+    transform: translateZ(0) translateY(-10px) rotate(-20deg);
+  }
+  50% {
+    opacity: 0;
+    transform: translateZ(0) translateY(-20px) rotate(-10deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateZ(0) translateY(-30px) rotate(0deg);
+  }
+}
+
+/* Comb Animation */
+.comb-animation {
+  position: relative;
+  display: inline-block;
+}
+
+.comb-animation::before {
+  content: '🪮';
+  position: absolute;
+  font-size: 1.5rem;
+  opacity: 0;
+  top: -20px;
+  left: 50%;
+  transform: translateZ(0) translateX(-50%);
+  animation: comb 4s infinite;
+}
+
+@keyframes comb {
+  0% {
+    opacity: 0;
+    transform: translateZ(0) translateX(-50%) translateY(0);
+  }
+  20% {
+    opacity: 1;
+    transform: translateZ(0) translateX(-50%) translateY(-5px);
+  }
+  40% {
+    transform: translateZ(0) translateX(-40%) translateY(-10px);
+  }
+  60% {
+    transform: translateZ(0) translateX(-60%) translateY(-15px);
+  }
+  80% {
+    opacity: 1;
+    transform: translateZ(0) translateX(-50%) translateY(-20px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateZ(0) translateX(-50%) translateY(-30px);
+  }
+}
+
+/* Razor Animation */
+.razor-animation {
+  position: relative;
+  display: inline-block;
+}
+
+.razor-animation::before {
+  content: '🪒';
+  position: absolute;
+  font-size: 1.5rem;
+  opacity: 0;
+  top: -20px;
+  left: 50%;
+  transform: translateZ(0) translateX(-50%);
+  animation: razor 5s infinite;
+}
+
+@keyframes razor {
+  0% {
+    opacity: 0;
+    transform: translateZ(0) translateX(-50%) translateY(0) rotate(0deg);
+  }
+  20% {
+    opacity: 1;
+    transform: translateZ(0) translateX(-50%) translateY(-5px) rotate(45deg);
+  }
+  40% {
+    transform: translateZ(0) translateX(-40%) translateY(-10px) rotate(90deg);
+  }
+  60% {
+    transform: translateZ(0) translateX(-60%) translateY(-15px) rotate(135deg);
+  }
+  80% {
+    opacity: 1;
+    transform: translateZ(0) translateX(-50%) translateY(-20px) rotate(180deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateZ(0) translateX(-50%) translateY(-30px) rotate(225deg);
+  }
+}
+
+/* Hairdryer Animation */
+.hairdryer-animation {
+  position: relative;
+  display: inline-block;
+}
+
+.hairdryer-animation::before {
+  content: '💨';
+  position: absolute;
+  font-size: 1.5rem;
+  opacity: 0;
+  top: -10px;
+  left: -30px;
+  transform: translateZ(0);
+  animation: blow 3s infinite;
+}
+
+@keyframes blow {
+  0% {
+    opacity: 0;
+    transform: translateZ(0) translateX(0);
+  }
+  20% {
+    opacity: 0.3;
+    transform: translateZ(0) translateX(10px);
+  }
+  40% {
+    opacity: 0.6;
+    transform: translateZ(0) translateX(20px);
+  }
+  60% {
+    opacity: 0.9;
+    transform: translateZ(0) translateX(30px);
+  }
+  80% {
+    opacity: 0.6;
+    transform: translateZ(0) translateX(40px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateZ(0) translateX(50px);
+  }
+}
+
+/* Rotating Barber Pole Animation */
+.barber-pole {
+  position: relative;
+  width: 20px;
+  height: 100px;
+  background: linear-gradient(
+    45deg,
+    #ff0000 25%,
+    #ffffff 25%,
+    #ffffff 50%,
+    #ff0000 50%,
+    #ff0000 75%,
+    #ffffff 75%,
+    #ffffff 100%
+  );
+  background-size: 20px 20px;
+  border-radius: 10px;
+  transform: translateZ(0);
+  animation: barber-pole 6s linear infinite;
+}
+
+@keyframes barber-pole {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 0 100px;
+  }
+}
+
+/* Floating Hair Strands Animation */
+.floating-hair {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 5;
+}
+
+.hair-strand {
+  position: absolute;
+  width: 2px;
+  height: 10px;
+  background-color: #333;
+  opacity: 0.5;
+  border-radius: 50%;
+  transform: translateZ(0);
+  animation: float-hair 10s linear infinite;
+}
+
+@keyframes float-hair {
+  0% {
+    transform: translateZ(0) translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.5;
+  }
+  90% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateZ(0) translateY(-100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Shine Effect Animation */
+.shine-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.shine-effect::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: translateZ(0) rotate(30deg);
+  animation: shine 6s infinite;
+}
+
+@keyframes shine {
+  0% {
+    transform: translateZ(0) rotate(30deg) translateX(-100%);
+  }
+  20%, 100% {
+    transform: translateZ(0) rotate(30deg) translateX(100%);
+  }
+}
+
+/* Pulsing Glow Animation */
+.pulsing-glow {
+  transform: translateZ(0);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 215, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+  }
+}
