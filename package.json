@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "source ~/.nvm/nvm.sh && nvm use && next dev",
-    "build": "source ~/.nvm/nvm.sh && nvm use && next build",
-    "start": "source ~/.nvm/nvm.sh && nvm use && next start",
-    "lint": "source ~/.nvm/nvm.sh && nvm use && next lint"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
