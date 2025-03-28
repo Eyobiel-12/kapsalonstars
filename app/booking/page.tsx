@@ -9,7 +9,12 @@ import { useToast } from "@/components/ui/use-toast"
 import emailjs from '@emailjs/browser'
 
 // Initialize EmailJS with environment variable
-emailjs.init(process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || '')
+const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY
+if (!publicKey) {
+  console.error('EmailJS public key is not set')
+} else {
+  emailjs.init(publicKey)
+}
 
 export default function BookingPage() {
   const { toast } = useToast()
@@ -94,12 +99,30 @@ export default function BookingPage() {
 
   const sendEmails = async (bookingReference: string) => {
     try {
+      const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID
+      const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID
+      const salonEmail = process.env.NEXT_PUBLIC_SALON_EMAIL
+
+      if (!serviceId || !templateId || !salonEmail) {
+        throw new Error('EmailJS configuration is missing')
+      }
+
+      // Log configuration in development
+      if (process.env.NODE_ENV === 'development') {
+        console.log('EmailJS Configuration:', {
+          serviceId,
+          templateId,
+          salonEmail,
+          publicKey: !!publicKey
+        })
+      }
+
       // Send to salon
       await emailjs.send(
-        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || '',
-        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || '',
+        serviceId,
+        templateId,
         {
-          to_email: process.env.NEXT_PUBLIC_SALON_EMAIL || '',
+          to_email: salonEmail,
           from_name: "Kapsalons Booking",
           subject: `Nieuwe afspraak: ${bookingReference}`,
           booking_reference: bookingReference,
@@ -117,8 +140,8 @@ export default function BookingPage() {
 
       // Send to customer
       await emailjs.send(
-        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || '',
-        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || '',
+        serviceId,
+        templateId,
         {
           to_email: formData.email,
           from_name: "Kapsalons",
@@ -137,6 +160,14 @@ export default function BookingPage() {
       );
     } catch (error) {
       console.error("Email sending error:", error);
+      // Show error to user
+      toast({
+        title: language === "nl" ? "E-mail Fout" : "Email Error",
+        description: language === "nl" 
+          ? "Er is een fout opgetreden bij het versturen van de e-mail. Probeer het later opnieuw."
+          : "There was an error sending the email. Please try again later.",
+        variant: "destructive",
+      });
       throw error;
     }
   }
