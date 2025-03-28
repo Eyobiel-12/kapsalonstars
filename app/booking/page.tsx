@@ -107,7 +107,7 @@ export default function BookingPage() {
         phone: formData.phone,
         date: formData.date,
         time: formData.time,
-        service: formData.service,
+        service: formData.service, 
         stylist: formData.stylist || "Geen voorkeur",
         discount_code: discountApplied ? `${formData.discountCode} (${discountAmount}% korting)` : "Geen",
         notes: formData.notes || "Geen",
