@@ -98,7 +98,7 @@ export default function BookingPage() {
       'service_w407w6e',
       'template_1j3e3uq',
       {
-        to_email: 'Kapsalonsrars@gmail.com',
+        to_email: 'Eyobielgoitom10@gmail.com ',
         from_name: "Kapsalons Booking",
         subject: `Nieuwe afspraak: ${bookingReference}`,
         booking_reference: bookingReference,
