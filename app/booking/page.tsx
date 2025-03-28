@@ -8,8 +8,8 @@ import { ArrowLeft, Calendar, Clock, User, Mail, Phone, MessageSquare, Loader2, 
 import { useToast } from "@/components/ui/use-toast"
 import emailjs from '@emailjs/browser'
 
-// Initialize EmailJS
-emailjs.init('RZURaY1TbKr4Eryol')
+// Initialize EmailJS with environment variable
+emailjs.init(process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || '')
 
 export default function BookingPage() {
   const { toast } = useToast()
@@ -93,47 +93,52 @@ export default function BookingPage() {
   }
 
   const sendEmails = async (bookingReference: string) => {
-    // Send to salon
-    await emailjs.send(
-      'service_w407w6e',
-      'template_1j3e3uq',
-      {
-        to_email: 'Eyobielgoitom10@gmail.com ',
-        from_name: "Kapsalons Booking",
-        subject: `Nieuwe afspraak: ${bookingReference}`,
-        booking_reference: bookingReference,
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        date: formData.date,
-        time: formData.time,
-        service: formData.service, 
-        stylist: formData.stylist || "Geen voorkeur",
-        discount_code: discountApplied ? `${formData.discountCode} (${discountAmount}% korting)` : "Geen",
-        notes: formData.notes || "Geen",
-      }
-    );
+    try {
+      // Send to salon
+      await emailjs.send(
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || '',
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || '',
+        {
+          to_email: process.env.NEXT_PUBLIC_SALON_EMAIL || '',
+          from_name: "Kapsalons Booking",
+          subject: `Nieuwe afspraak: ${bookingReference}`,
+          booking_reference: bookingReference,
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          date: formData.date,
+          time: formData.time,
+          service: formData.service,
+          stylist: formData.stylist || "Geen voorkeur",
+          discount_code: discountApplied ? `${formData.discountCode} (${discountAmount}% korting)` : "Geen",
+          notes: formData.notes || "Geen",
+        }
+      );
 
-    // Send to customer
-    await emailjs.send(
-      'service_w407w6e',
-      'template_1j3e3uq',
-      {
-        to_email: formData.email,
-        from_name: "Kapsalons",
-        subject: 'Afspraakbevestiging - Kapsalons',
-        booking_reference: bookingReference,
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        date: formData.date,
-        time: formData.time,
-        service: formData.service,
-        stylist: formData.stylist || "Geen voorkeur",
-        discount_code: discountApplied ? `${formData.discountCode} (${discountAmount}% korting)` : "Geen",
-        notes: formData.notes || "Geen",
-      }
-    );
+      // Send to customer
+      await emailjs.send(
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || '',
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || '',
+        {
+          to_email: formData.email,
+          from_name: "Kapsalons",
+          subject: 'Afspraakbevestiging - Kapsalons',
+          booking_reference: bookingReference,
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          date: formData.date,
+          time: formData.time,
+          service: formData.service,
+          stylist: formData.stylist || "Geen voorkeur",
+          discount_code: discountApplied ? `${formData.discountCode} (${discountAmount}% korting)` : "Geen",
+          notes: formData.notes || "Geen",
+        }
+      );
+    } catch (error) {
+      console.error("Email sending error:", error);
+      throw error;
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
