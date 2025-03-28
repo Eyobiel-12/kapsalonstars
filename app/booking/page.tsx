@@ -129,6 +129,21 @@ export default function BookingPage() {
         throw new Error('EmailJS configuration is missing')
       }
 
+      // Format the booking details for the email
+      const bookingDetails = {
+        booking_reference: bookingReference,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        date: formData.date,
+        time: formData.time,
+        service: formData.service,
+        stylist: formData.stylist || "Geen voorkeur",
+        discount_code: discountApplied ? `${formData.discountCode} (${discountAmount}% korting)` : "Geen",
+        notes: formData.notes || "Geen",
+        total_price: formData.service ? services.find(s => s.name === formData.service)?.price || "€0" : "€0"
+      }
+
       // Send to salon
       console.log('Attempting to send email to salon:', salonEmail)
       try {
@@ -139,16 +154,7 @@ export default function BookingPage() {
             to_email: salonEmail,
             from_name: "Kapsalons Booking",
             subject: `Nieuwe afspraak: ${bookingReference}`,
-            booking_reference: bookingReference,
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
-            date: formData.date,
-            time: formData.time,
-            service: formData.service,
-            stylist: formData.stylist || "Geen voorkeur",
-            discount_code: discountApplied ? `${formData.discountCode} (${discountAmount}% korting)` : "Geen",
-            notes: formData.notes || "Geen",
+            ...bookingDetails
           }
         );
         console.log('Salon email sent successfully')
@@ -167,16 +173,7 @@ export default function BookingPage() {
             to_email: formData.email,
             from_name: "Kapsalons",
             subject: 'Afspraakbevestiging - Kapsalons',
-            booking_reference: bookingReference,
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
-            date: formData.date,
-            time: formData.time,
-            service: formData.service,
-            stylist: formData.stylist || "Geen voorkeur",
-            discount_code: discountApplied ? `${formData.discountCode} (${discountAmount}% korting)` : "Geen",
-            notes: formData.notes || "Geen",
+            ...bookingDetails
           }
         );
         console.log('Customer email sent successfully')
