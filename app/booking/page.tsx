@@ -13,6 +13,7 @@ const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY
 if (!publicKey) {
   console.error('EmailJS public key is not set')
 } else {
+  console.log('Initializing EmailJS with public key:', publicKey.substring(0, 4) + '...')
   emailjs.init(publicKey)
 }
 
@@ -103,61 +104,86 @@ export default function BookingPage() {
       const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID
       const salonEmail = process.env.NEXT_PUBLIC_SALON_EMAIL
 
+      // Always log configuration values (both development and production)
+      console.log('EmailJS Configuration:', {
+        serviceId,
+        templateId,
+        salonEmail,
+        publicKey: !!publicKey,
+        environment: process.env.NODE_ENV,
+        isBrowser: typeof window !== 'undefined'
+      })
+
       if (!serviceId || !templateId || !salonEmail) {
+        console.error('Missing EmailJS configuration:', {
+          hasServiceId: !!serviceId,
+          hasTemplateId: !!templateId,
+          hasSalonEmail: !!salonEmail,
+          allEnvVars: {
+            NEXT_PUBLIC_EMAILJS_PUBLIC_KEY: !!process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY,
+            NEXT_PUBLIC_EMAILJS_SERVICE_ID: !!process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID,
+            NEXT_PUBLIC_EMAILJS_TEMPLATE_ID: !!process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID,
+            NEXT_PUBLIC_SALON_EMAIL: !!process.env.NEXT_PUBLIC_SALON_EMAIL
+          }
+        })
         throw new Error('EmailJS configuration is missing')
       }
 
-      // Log configuration in development
-      if (process.env.NODE_ENV === 'development') {
-        console.log('EmailJS Configuration:', {
+      // Send to salon
+      console.log('Attempting to send email to salon:', salonEmail)
+      try {
+        await emailjs.send(
           serviceId,
           templateId,
-          salonEmail,
-          publicKey: !!publicKey
-        })
+          {
+            to_email: salonEmail,
+            from_name: "Kapsalons Booking",
+            subject: `Nieuwe afspraak: ${bookingReference}`,
+            booking_reference: bookingReference,
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            date: formData.date,
+            time: formData.time,
+            service: formData.service,
+            stylist: formData.stylist || "Geen voorkeur",
+            discount_code: discountApplied ? `${formData.discountCode} (${discountAmount}% korting)` : "Geen",
+            notes: formData.notes || "Geen",
+          }
+        );
+        console.log('Salon email sent successfully')
+      } catch (salonError) {
+        console.error('Failed to send salon email:', salonError)
+        throw salonError
       }
 
-      // Send to salon
-      await emailjs.send(
-        serviceId,
-        templateId,
-        {
-          to_email: salonEmail,
-          from_name: "Kapsalons Booking",
-          subject: `Nieuwe afspraak: ${bookingReference}`,
-          booking_reference: bookingReference,
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          date: formData.date,
-          time: formData.time,
-          service: formData.service,
-          stylist: formData.stylist || "Geen voorkeur",
-          discount_code: discountApplied ? `${formData.discountCode} (${discountAmount}% korting)` : "Geen",
-          notes: formData.notes || "Geen",
-        }
-      );
-
       // Send to customer
-      await emailjs.send(
-        serviceId,
-        templateId,
-        {
-          to_email: formData.email,
-          from_name: "Kapsalons",
-          subject: 'Afspraakbevestiging - Kapsalons',
-          booking_reference: bookingReference,
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          date: formData.date,
-          time: formData.time,
-          service: formData.service,
-          stylist: formData.stylist || "Geen voorkeur",
-          discount_code: discountApplied ? `${formData.discountCode} (${discountAmount}% korting)` : "Geen",
-          notes: formData.notes || "Geen",
-        }
-      );
+      console.log('Attempting to send email to customer:', formData.email)
+      try {
+        await emailjs.send(
+          serviceId,
+          templateId,
+          {
+            to_email: formData.email,
+            from_name: "Kapsalons",
+            subject: 'Afspraakbevestiging - Kapsalons',
+            booking_reference: bookingReference,
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            date: formData.date,
+            time: formData.time,
+            service: formData.service,
+            stylist: formData.stylist || "Geen voorkeur",
+            discount_code: discountApplied ? `${formData.discountCode} (${discountAmount}% korting)` : "Geen",
+            notes: formData.notes || "Geen",
+          }
+        );
+        console.log('Customer email sent successfully')
+      } catch (customerError) {
+        console.error('Failed to send customer email:', customerError)
+        throw customerError
+      }
     } catch (error) {
       console.error("Email sending error:", error);
       // Show error to user
@@ -660,7 +686,7 @@ export default function BookingPage() {
                   </li>
                   <li className="flex items-center gap-2">
                     <Mail className="h-5 w-5 text-gray-400" />
-                    <span className="text-gray-600">info@kapsalons.com</span>
+                    <span className="text-gray-600">Kapsalonstars@gmail.com</span>
                   </li>
                 </ul>
               </div>
