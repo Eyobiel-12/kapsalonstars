@@ -689,6 +689,11 @@ export default function BookingPage() {
                     <span className="text-gray-600">Kapsalonstars@gmail.com</span>
                   </li>
                 </ul>
+                <p className="mt-4 text-sm text-gray-500">
+                  {language === "nl" 
+                    ? "Neem gerust contact met ons op voor vragen over uw afspraak"
+                    : "Feel free to contact us with any questions about your appointment"}
+                </p>
               </div>
             </div>
           </div>
