@@ -6,6 +6,10 @@ import { useState } from "react"
 import Link from "next/link"
 import { ArrowLeft, Calendar, Clock, User, Mail, Phone, MessageSquare, Loader2, Tag } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
+import emailjs from '@emailjs/browser'
+
+// Initialize EmailJS
+emailjs.init('RZURaY1TbKr4Eryol')
 
 export default function BookingPage() {
   const { toast } = useToast()
@@ -88,11 +92,61 @@ export default function BookingPage() {
     }
   }
 
+  const sendEmails = async (bookingReference: string) => {
+    // Send to salon
+    await emailjs.send(
+      'service_w407w6e',
+      'template_1j3e3uq',
+      {
+        to_email: 'Kapsalonsrars@gmail.com',
+        from_name: "Kapsalons Booking",
+        subject: `Nieuwe afspraak: ${bookingReference}`,
+        booking_reference: bookingReference,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        date: formData.date,
+        time: formData.time,
+        service: formData.service,
+        stylist: formData.stylist || "Geen voorkeur",
+        discount_code: discountApplied ? `${formData.discountCode} (${discountAmount}% korting)` : "Geen",
+        notes: formData.notes || "Geen",
+      }
+    );
+
+    // Send to customer
+    await emailjs.send(
+      'service_w407w6e',
+      'template_1j3e3uq',
+      {
+        to_email: formData.email,
+        from_name: "Kapsalons",
+        subject: 'Afspraakbevestiging - Kapsalons',
+        booking_reference: bookingReference,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        date: formData.date,
+        time: formData.time,
+        service: formData.service,
+        stylist: formData.stylist || "Geen voorkeur",
+        discount_code: discountApplied ? `${formData.discountCode} (${discountAmount}% korting)` : "Geen",
+        notes: formData.notes || "Geen",
+      }
+    );
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
 
     try {
+      const bookingReference = `KAP${Date.now()}`
+      
+      // Send emails first
+      await sendEmails(bookingReference)
+
+      // Then save the booking
       const response = await fetch("/api/booking", {
         method: "POST",
         headers: {
@@ -101,6 +155,7 @@ export default function BookingPage() {
         body: JSON.stringify({
           ...formData,
           discountCode: discountApplied ? discountCode : "",
+          bookingReference,
         }),
       })
 
@@ -133,6 +188,7 @@ export default function BookingPage() {
         throw new Error(data.message)
       }
     } catch (error) {
+      console.error("Booking error:", error)
       toast({
         title: language === "nl" ? "Afspraak Mislukt" : "Booking Failed",
         description:

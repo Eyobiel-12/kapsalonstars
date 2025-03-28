@@ -1,16 +1,4 @@
 import { NextResponse } from "next/server"
-import nodemailer from "nodemailer"
-
-// This would be replaced with your actual email configuration
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || "smtp.example.com",
-  port: Number.parseInt(process.env.EMAIL_PORT || "587"),
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER || "your-email@example.com",
-    pass: process.env.EMAIL_PASSWORD || "your-password",
-  },
-})
 
 // Simple in-memory database for demonstration
 // In production, use a real database like MongoDB, PostgreSQL, etc.
@@ -22,9 +10,6 @@ const discountCodes: { [key: string]: { used: boolean; email: string; discount: 
 export async function POST(req: Request) {
   try {
     const data = await req.json()
-
-    // Generate a unique booking reference
-    const bookingReference = `KAP${Date.now()}`
 
     // Check if discount code is valid
     let discountApplied = false
@@ -44,7 +29,7 @@ export async function POST(req: Request) {
 
     // Store booking in our "database"
     const booking = {
-      id: bookingReference,
+      id: data.bookingReference,
       ...data,
       discountApplied,
       discountAmount,
@@ -54,65 +39,10 @@ export async function POST(req: Request) {
 
     bookings.push(booking)
 
-    // Send email to salon
-    const salonEmailContent = `
-      Nieuwe afspraak aanvraag:
-      
-      Referentie: ${bookingReference}
-      Naam: ${data.name}
-      E-mail: ${data.email}
-      Telefoon: ${data.phone}
-      Datum: ${data.date}
-      Tijd: ${data.time}
-      Dienst: ${data.service}
-      Stylist: ${data.stylist || "Geen voorkeur"}
-      Opmerkingen: ${data.notes || "Geen"}
-      
-      Kortingscode toegepast: ${discountApplied ? "Ja, " + discountAmount + "%" : "Nee"}
-    `
-
-    // Send confirmation email to customer
-    const customerEmailContent = `
-      Beste ${data.name},
-      
-      Bedankt voor je afspraak bij Kapsalons!
-      
-      Afspraakdetails:
-      Referentie: ${bookingReference}
-      Datum: ${data.date}
-      Tijd: ${data.time}
-      Dienst: ${data.service}
-      ${data.stylist ? `Stylist: ${data.stylist}` : ""}
-      
-      ${discountApplied ? `Je kortingscode ${data.discountCode} is toegepast voor ${discountAmount}% korting.` : ""}
-      
-      We hebben je aanvraag ontvangen en zullen deze zo snel mogelijk bevestigen.
-      
-      Met vriendelijke groet,
-      Het Kapsalons Team
-    `
-
-    // In a production environment, uncomment these to send actual emails
-    /*
-    await transporter.sendMail({
-      from: '"Kapsalons Booking" <bookings@kapsalons.com>',
-      to: 'info@kapsalons.com',
-      subject: `Nieuwe afspraak: ${bookingReference}`,
-      text: salonEmailContent,
-    });
-    
-    await transporter.sendMail({
-      from: '"Kapsalons" <bookings@kapsalons.com>',
-      to: data.email,
-      subject: 'Afspraakbevestiging - Kapsalons',
-      text: customerEmailContent,
-    });
-    */
-
     return NextResponse.json({
       success: true,
       message: "Afspraak succesvol aangevraagd",
-      bookingReference,
+      bookingReference: data.bookingReference,
       discountApplied,
       discountAmount,
       ...data,
